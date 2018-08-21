@@ -1,15 +1,18 @@
 package com.example.android.news;
 
+import java.util.Date;
+
+
 public class News {
 
-    // Magnitude of News
-    private double mMagnitude;
+    // Section of the News
+    private String mSectionName;
 
-    // Location of News
-    private String mLocation;
+    // Title of the News
+    private String mTitle;
 
-    //Time of the earthquake
-    private long mTimeInMilliseconds;
+    //Time of Publication
+    private Date mWebPublicationDate;
 
     //URL
     private String mUrl;
@@ -18,38 +21,38 @@ public class News {
     /**
      * Constructs a new {@link News} object.
      *
-     * @param magnitude          is the magnitude (size) of the earthquake
-     * @param location           is the city location of the earthquake
-     * @param timeInMilliseconds is the time in milliseconds (from the Epoch) when the earthquake happened
+     * @param sectionName        is the section name
+     * @param title              is the article title
+     * @param webpublicationdate is the date of publication
      * @param url                is the URL
      */
 
-    public News(double magnitude, String location, long timeInMilliseconds, String url) {
-        mMagnitude = magnitude;
-        mLocation = location;
-        mTimeInMilliseconds = timeInMilliseconds;
+    public News(String sectionName, String title, Date webpublicationdate, String url) {
+        mSectionName = sectionName;
+        mTitle = title;
+        mWebPublicationDate = webpublicationdate;
         mUrl = url;
     }
 
     /**
-     * Get magnitude of earthquake
+     * Get Section Name
      */
-    public double getMagnitude() {
-        return mMagnitude;
+    public String getSectionName() {
+        return mSectionName;
     }
 
     /**
-     * Get location of the earthquake
+     * Get Title of Article
      */
-    public String getLocation() {
-        return mLocation;
+    public String getTitle() {
+        return mTitle;
     }
 
     /**
-     * Get date of earthquake
+     * Get date of publication
      */
-    public long getTimeInMilliseconds() {
-        return mTimeInMilliseconds;
+    public Date getWebPublicationDate() {
+        return mWebPublicationDate;
     }
 
     /**

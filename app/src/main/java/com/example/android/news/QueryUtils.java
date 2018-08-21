@@ -30,7 +30,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,7 +40,9 @@ import java.util.List;
  */
 public final class QueryUtils {
 
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
     /**
@@ -160,7 +164,7 @@ public final class QueryUtils {
         }
 
         // Create an empty ArrayList that we can start adding news to
-        List<News> news = new ArrayList<>();
+        List<News> newsList = new ArrayList<>();
 
         // Try to parse the JSON response string. If there's a problem with the way the JSON
         // is formatted, a JSONException exception object will be thrown.
@@ -170,39 +174,46 @@ public final class QueryUtils {
             // Create a JSONObject from the JSON response string
             JSONObject baseJsonResponse = new JSONObject(newsJSON);
 
-            // Extract the JSONArray associated with the key called "features",
-            // which represents a list of features (or news).
-            JSONArray newsArray = baseJsonResponse.getJSONArray("features");
+            // Extract the JSONArray associated with the key called "results",
+            // which represents a list of results (or news).
+            JSONArray newsArray = baseJsonResponse.getJSONObject("response").getJSONArray("results");
 
-            // For each earthquake in the earthquakeArray, create an {@link News} object
+            // For each news in the newsArray, create an {@link News} object
             for (int i = 0; i < newsArray.length(); i++) {
 
                 // Get a single news at position i within the list of news
                 JSONObject currentNews = newsArray.getJSONObject(i);
 
-                // For a given news, extract the JSONObject associated with the
-                // key called "properties", which represents a list of all properties
-                // for that news.
-                JSONObject properties = currentNews.getJSONObject("properties");
+                // Extract the value for the key called "webTitle"
+                String title = currentNews.getString("webTitle");
 
-                // Extract the value for the key called "mag"
-                double magnitude = properties.getDouble("mag");
+                // Extract the value for the key called "sectionName"
+                String sectionName = currentNews.getString("sectionName");
 
-                // Extract the value for the key called "place"
-                String location = properties.getString("place");
 
-                // Extract the value for the key called "time"
-                long time = properties.getLong("time");
+                // Extract the value for the key called "webPublicationDate"
+                String webPublicationDate = currentNews.getString("webPublicationDate");
+
+                //Format publication date
+                Date publicationDate = null;
+                try {
+                    publicationDate = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")).parse(webPublicationDate);
+                } catch (Exception e) {
+                    // If an error is thrown when executing the above statement in the "try" block,
+                    // catch the exception here, so the app doesn't crash. Print a log message
+                    // with the message from the exception.
+                    Log.e("QueryUtils", "Problem parsing the news date", e);
+                }
 
                 // Extract the value for the key called "url"
-                String url = properties.getString("url");
+                String url = currentNews.getString("webUrl");
 
                 // Create a new {@link News} object with the magnitude, location, time,
                 // and url from the JSON response.
-                News newz = new News(magnitude, location, time, url);
+                News news = new News(sectionName, title, publicationDate, url);
 
                 // Add the new {@link News} to the list of news.
-                news.add(newz);
+                newsList.add(news);
             }
 
         } catch (JSONException e) {
@@ -213,7 +224,7 @@ public final class QueryUtils {
         }
 
         // Return the list of news
-        return news;
+        return newsList;
     }
 
 }

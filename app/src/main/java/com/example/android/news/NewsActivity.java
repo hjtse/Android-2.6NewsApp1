@@ -43,7 +43,7 @@ public class NewsActivity extends AppCompatActivity
      * URL for earthquake data from the USGS dataset
      */
     private static final String GUARDIAN_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=6&limit=10";
+            "https://content.guardianapis.com/search?api-key=90b2534c-709b-4c3c-b8e2-b048486808b7";
 
     /**
      * Constant value for the earthquake loader ID. We can choose any integer.
