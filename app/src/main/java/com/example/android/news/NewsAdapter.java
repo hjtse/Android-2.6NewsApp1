@@ -27,11 +27,12 @@ public class NewsAdapter extends ArrayAdapter<News> {
      * Constructs a new {@link NewsAdapter}.
      *
      * @param context of the app
-     * @param news is the list of news, which is the data source of the adapter
+     * @param news    is the list of news, which is the data source of the adapter
      */
     public NewsAdapter(Context context, List<News> news) {
         super(context, 0, news);
     }
+
     /**
      * Returns a list item view that displays information about the earthquake at the given position
      * in the list of earthquakes.
@@ -67,14 +68,6 @@ public class NewsAdapter extends ArrayAdapter<News> {
 
         // Set the color on the magnitude circle
         magnitudeCircle.setColor(magnitudeColor);
-
-
-
-
-
-
-
-
 
 
         // Get the original location string from the News object,
@@ -116,21 +109,6 @@ public class NewsAdapter extends ArrayAdapter<News> {
         TextView locationOffsetView = (TextView) listItemView.findViewById(R.id.location_offset);
         // Display the location offset of the current earthquake in that TextView
         locationOffsetView.setText(locationOffset);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         // Create a new Date object from the time in milliseconds of the earthquake
