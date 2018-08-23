@@ -21,6 +21,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 /**
  * Helper methods related to requesting and receiving news data from Guardian.
@@ -190,7 +192,6 @@ public final class QueryUtils {
                 // Extract the value for the key called "sectionName"
                 String sectionName = currentNews.getString("sectionName");
 
-
                 // Extract the value for the key called "webPublicationDate"
                 String webPublicationDate = currentNews.getString("webPublicationDate");
 
@@ -208,9 +209,32 @@ public final class QueryUtils {
                 // Extract the value for the key called "url"
                 String url = currentNews.getString("webUrl");
 
+                //"Tags" element
+                JSONArray tags = currentNews.getJSONArray("tags");
+
+                //If "tags" array is not null
+                String authorFullName = "";
+                if (!tags.isNull(0)) {
+                    JSONObject currentTag = tags.getJSONObject(0);
+
+                    //Author first name
+                    String authorFirstName = !currentTag.isNull("firstName") ? currentTag.getString("firstName") : "";
+
+                    //Author last name
+                    String authorLastName = !currentTag.isNull("lastName") ? currentTag.getString("lastName") : "";
+
+                    //Author full name
+                    authorFullName = StringUtils.capitalize(authorFirstName.toLowerCase().trim()) + " " + StringUtils.capitalize(authorLastName.toLowerCase().trim());
+                    if (authorFirstName.trim() != "" || authorLastName.trim() != "") {
+                        authorFullName = ("By: ").concat(authorFullName);
+                    } else {
+                        authorFullName = "";
+                    }
+                }
+
                 // Create a new {@link News} object with the magnitude, location, time,
                 // and url from the JSON response.
-                News news = new News(sectionName, title, publicationDate, url);
+                News news = new News(sectionName, title, publicationDate, url, authorFullName);
 
                 // Add the new {@link News} to the list of news.
                 newsList.add(news);

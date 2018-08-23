@@ -54,6 +54,11 @@ public class NewsAdapter extends ArrayAdapter<News> {
         // Display the section name of the current news in that TextView
         sectionNameView.setText(currentNews.getSectionName());
 
+        // Find the TextView with view ID author_name
+        TextView authorNameView = (TextView) listItemView.findViewById(R.id.author);
+        // Display the author name of the current news in that TextView
+        authorNameView.setText(currentNews.getAuthor());
+
 
         // Find the TextView with view ID date
         TextView dateView = null;

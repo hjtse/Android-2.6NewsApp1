@@ -17,6 +17,9 @@ public class News {
     //URL
     private String mUrl;
 
+    //Author
+    private String mAuthor;
+
 
     /**
      * Constructs a new {@link News} object.
@@ -25,13 +28,15 @@ public class News {
      * @param title              is the article title
      * @param webpublicationdate is the date of publication
      * @param url                is the URL
+     * @param author             is the author
      */
 
-    public News(String sectionName, String title, Date webpublicationdate, String url) {
+    public News(String sectionName, String title, Date webpublicationdate, String url, String author) {
         mSectionName = sectionName;
         mTitle = title;
         mWebPublicationDate = webpublicationdate;
         mUrl = url;
+        mAuthor = author;
     }
 
     /**
@@ -60,6 +65,13 @@ public class News {
      */
     public String getUrl() {
         return mUrl;
+    }
+
+    /**
+     * Get author name
+     */
+    public String getAuthor() {
+        return mAuthor;
     }
 
 
