@@ -150,11 +150,12 @@ public class NewsActivity extends AppCompatActivity
         Uri.Builder uriBuilder = baseUri.buildUpon();
 
         // Append query parameter and its value. For example, the `format=geojson`
-        uriBuilder.appendQueryParameter("order-by", orderBy);
+        uriBuilder.appendQueryParameter("format", "json");
+        uriBuilder.appendQueryParameter("orderby", orderBy);
 
 
         // Create a new loader for the given URL
-        return new NewsLoader(this, GUARDIAN_REQUEST_URL);
+        return new NewsLoader(this, uriBuilder.toString());
     }
 
     @Override
