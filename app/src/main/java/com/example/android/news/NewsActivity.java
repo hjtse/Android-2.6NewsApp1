@@ -148,6 +148,8 @@ public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     @Override
     public void onLoaderReset(Loader<List<News>> loader) {
+        Log.i(LOG_TAG, "TEST: onLoaderReset() called ...");
+
         mAdapter.clear();
     }
 
