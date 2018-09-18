@@ -37,8 +37,14 @@ public class SettingsActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.settings_main);
 
+            Preference Search = findPreference(getString(R.string.settings_search_key));
+            bindPreferenceSummaryToValue(Search);
+
             Preference orderBy = findPreference(getString(R.string.settings_order_by_key));
             bindPreferenceSummaryToValue(orderBy);
+
+            Preference section = findPreference(getString(R.string.settings_section_key));
+            bindPreferenceSummaryToValue(section);
         }
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
