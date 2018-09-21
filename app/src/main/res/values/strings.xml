@@ -29,6 +29,10 @@
     <string name="settings_Search_default" translatable="false">tech</string>
     <string name="settings_search_key" translatable="false">SearchTerm</string>
 
+    <string name="settings_search_label">Search</string>
+    <string name="settings_search_default" translatable="false"></string>
+    <string name="settings_search_key" translatable="false">SearchTerm</string>
+
     <!-- Strings For Order-By Preference [CHAR LIMIT=30] -->
     <string name="settings_order_by_label">Order By</string>
     <string name="settings_order_by_key" translatable="false">order_by</string>
@@ -59,5 +63,13 @@
     <string name="settings_section_environment_value" translatable="false">environment</string>
     <string name="settings_section_football_label">Football</string>
     <string name="settings_section_football_value" translatable="false">football</string>
+<<<<<<< HEAD
+
+    <!-- Label for order-by title option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_title_label">Title</string>
+    <string name="settings_order_by_title_value" translatable="false">title</string>
+
+=======
+>>>>>>> 8e11210643553488911f1346e3f2ee2b2b494591
 
 </resources>
