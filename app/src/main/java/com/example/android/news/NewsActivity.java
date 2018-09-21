@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.android.news;
 
 import android.app.LoaderManager;
@@ -20,12 +5,16 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -34,32 +23,15 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewsActivity extends AppCompatActivity
-        implements LoaderCallbacks<List<News>> {
+public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<List<News>> {
 
-    private static final String LOG_TAG = NewsActivity.class.getName();
-
-    /**
-     * URL for earthquake data from the USGS dataset
-     */
-    private static final String GUARDIAN_REQUEST_URL =
-            "https://content.guardianapis.com/search?api-key=90b2534c-709b-4c3c-b8e2-b048486808b7&show-tags=contributor";
-
-    /**
-     * Constant value for the earthquake loader ID. We can choose any integer.
-     * This really only comes into play if you're using multiple loaders.
-     */
     private static final int NEWS_LOADER_ID = 1;
+    private static final String GUARDIAN_REQUEST_URL = "https://content.guardianapis.com/search?api-key=90b2534c-709b-4c3c-b8e2-b048486808b7&show-tags=contributor";
 
-    /**
-     * Adapter for the list of earthquakes
-     */
     private NewsAdapter mAdapter;
-
-    /**
-     * TextView that is displayed when the list is empty
-     */
+    private static final String LOG_TAG = NewsActivity.class.getName();
     private TextView mEmptyStateTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,38 +40,23 @@ public class NewsActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news_activity);
 
-        // Find a reference to the {@link ListView} in the layout
-        ListView newsListView = (ListView) findViewById(R.id.list);
+        ListView NewsListView = (ListView) findViewById(R.id.list);
+
+        mAdapter = new NewsAdapter(this, new ArrayList<News>());
+        NewsListView.setAdapter(mAdapter);
 
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
-        newsListView.setEmptyView(mEmptyStateTextView);
+        NewsListView.setEmptyView(mEmptyStateTextView);
 
-        // Create a new adapter that takes an empty list of earthquakes as input
-        mAdapter = new NewsAdapter(this, new ArrayList<News>());
-
-        // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
-        newsListView.setAdapter(mAdapter);
-
-        // Set an item click listener on the ListView, which sends an intent to a web browser
-        // to open a website with more information about the selected earthquake.
-        newsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        NewsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                // Find the current earthquake that was clicked on
-                News currentNews = mAdapter.getItem(position);
-
-                // Convert the String URL into a URI object (to pass into the Intent constructor)
-                Uri newsUri = Uri.parse(currentNews.getUrl());
-
-                // Create a new intent to view the earthquake URI
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, newsUri);
-
-                // Send the intent to launch a new activity
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                News currentNews = mAdapter.getItem(i);
+                Uri NewsUri = Uri.parse(currentNews.getUrl());
+                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, NewsUri);
                 startActivity(websiteIntent);
             }
         });
-
         // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -131,8 +88,41 @@ public class NewsActivity extends AppCompatActivity
     public Loader<List<News>> onCreateLoader(int i, Bundle bundle) {
         Log.i(LOG_TAG, "TEST: onCreateLoader() called ...");
 
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // getString retrieves a String value from the preferences. The second parameter is the default value for this preference.
+        String orderBy = sharedPrefs.getString(getString(R.string.settings_order_by_key), getString(R.string.settings_order_by_default));
+        String Search = sharedPrefs.getString(getString(R.string.settings_search_key), getString(R.string.settings_Search_default));
+        String section = sharedPrefs.getString(getString(R.string.settings_section_key), getString(R.string.settings_section_default));
+
+
+        // parse breaks apart the URI string that's passed into its parameter
+        Uri baseUri = Uri.parse(GUARDIAN_REQUEST_URL);
+
+        // buildUpon prepares the baseUri that we just parsed so we can add query parameters to it
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+
+        if (!Search.equals("")) {
+            uriBuilder.appendQueryParameter("q", Search);
+            orderBy = getString(R.string.settings_order_by_relevance_value);
+        }
+        if (Search.equals("") && orderBy.equals(getString(R.string.settings_order_by_relevance_value))) {
+            orderBy = getString(R.string.settings_order_by_newest_value);
+        }
+        if (!section.equals("")) {
+            if (!section.equals(getString(R.string.settings_section_default_value))) {
+                uriBuilder.appendQueryParameter("section", section);
+            }
+        }
+
+        // Append query parameter and its value. For example, the `format=geojson`
+        uriBuilder.appendQueryParameter("format", "json");
+        uriBuilder.appendQueryParameter("q", Search);
+        uriBuilder.appendQueryParameter("order-by", orderBy);
+
+
         // Create a new loader for the given URL
-        return new NewsLoader(this, GUARDIAN_REQUEST_URL);
+        return new NewsLoader(this, uriBuilder.toString());
     }
 
     @Override
@@ -144,7 +134,7 @@ public class NewsActivity extends AppCompatActivity
         loadingIndicator.setVisibility(View.GONE);
 
         // Set empty state text to display "No news found."
-        mEmptyStateTextView.setText(R.string.no_earthquakes);
+        mEmptyStateTextView.setText(R.string.no_news);
 
 
         // Clear the adapter of previous earthquake data
@@ -161,7 +151,25 @@ public class NewsActivity extends AppCompatActivity
     public void onLoaderReset(Loader<List<News>> loader) {
         Log.i(LOG_TAG, "TEST: onLoaderReset() called ...");
 
-        // Loader reset, so we can clear out our existing data.
         mAdapter.clear();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
+
+

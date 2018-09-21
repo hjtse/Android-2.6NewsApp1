@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/settings_title">
+
+    <EditTextPreference
+<<<<<<< HEAD
+        android:defaultValue="@string/settings_search_default"
+=======
+        android:defaultValue="@string/settings_Search_default"
+>>>>>>> 8e11210643553488911f1346e3f2ee2b2b494591
+        android:inputType="textCapWords"
+        android:key="@string/settings_search_key"
+        android:selectAllOnFocus="true"
+        android:title="@string/settings_search_label" />
+    <ListPreference
+        android:defaultValue="@string/settings_order_by_default"
+        android:entries="@array/settings_order_by_labels"
+        android:entryValues="@array/settings_order_by_values"
+        android:key="@string/settings_order_by_key"
+        android:title="@string/settings_order_by_label" />
+    <ListPreference
+        android:defaultValue="@string/settings_section_default"
+        android:entries="@array/settings_section_labels"
+        android:entryValues="@array/settings_section_values"
+        android:key="@string/settings_section_key"
+        android:title="@string/settings_section_label" />
+<<<<<<< HEAD
+
+=======
+>>>>>>> 8e11210643553488911f1346e3f2ee2b2b494591
+
+
+</PreferenceScreen>

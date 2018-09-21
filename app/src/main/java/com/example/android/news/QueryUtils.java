@@ -1,20 +1,6 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.android.news;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -41,28 +27,69 @@ import java.util.List;
  * Helper methods related to requesting and receiving news data from Guardian.
  */
 public final class QueryUtils {
+    private static final String LOG_TAG = NewsActivity.class.getSimpleName();
+    static Context mContext;
 
-    /**
-     * Tag for the log messages
-     */
-    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
+    public static ArrayList<News> extractNews(String NewsJSon) {
+        ArrayList<News> NewsToday = new ArrayList<>();
+        if (TextUtils.isEmpty(NewsJSon)) {
+            Log.e(mContext.getString(R.string.Query), mContext.getString(R.string.emptyJson));
+            return null;
+        }
+        try {
+            JSONObject baseJsonResponse;
+            JSONObject NewsResponse;
+            JSONArray resultsArray;
+            baseJsonResponse = new JSONObject(NewsJSon);
+            if (baseJsonResponse.has(mContext.getString(R.string.response))) {
+                NewsResponse = baseJsonResponse.getJSONObject(mContext.getResources().getString(R.string.response));
 
-    /**
-     * Create a private constructor because no one should ever create a {@link QueryUtils} object.
-     * This class is only meant to hold static variables and methods, which can be accessed
-     * directly from the class name QueryUtils (and an object instance of QueryUtils is not needed).
-     */
-    private QueryUtils() {
+                if (NewsResponse.has(mContext.getString(R.string.results))) {
+                    resultsArray = NewsResponse.getJSONArray(mContext.getString(R.string.results));
+
+                    for (int i = 0; i < resultsArray.length(); i++) {
+                        String webTitle = "";
+                        String sectionName = "";
+                        String DateTime = "";
+                        String webUrl = "";
+                        String thumbnail = "";
+                        String contributor = "";
+                        JSONObject currentNews = resultsArray.getJSONObject(i);
+                        if (currentNews.has(mContext.getString(R.string.webTitle))) {
+                            webTitle = currentNews.getString(mContext.getString(R.string.webTitle));
+                        }
+                        if (currentNews.has(mContext.getString(R.string.sectionName))) {
+                            sectionName = currentNews.getString(mContext.getString(R.string.sectionName));
+                        }
+                        if (currentNews.has(mContext.getString(R.string.webUrl))) {
+                            webUrl = currentNews.getString(mContext.getString(R.string.webUrl));
+                        }
+                        if (currentNews.has(mContext.getString(R.string.webPublicationDate))) {
+                            DateTime = currentNews.getString(mContext.getString(R.string.webPublicationDate));
+                        }
+
+                        if (currentNews.has(mContext.getString(R.string.tags))) {
+                            JSONArray tagsArray = currentNews.getJSONArray(mContext.getString(R.string.tags));
+                            if (tagsArray.length() != 0) {
+                                JSONObject tags = tagsArray.getJSONObject(0);
+                                if (tags.has(mContext.getString(R.string.webTitle))) {
+                                    contributor = tags.getString(mContext.getString(R.string.webTitle));
+                                }
+                            }
+                        }
+                        News NewNews = new News(webTitle, sectionName, webUrl, DateTime, contributor);
+                        NewsToday.add(NewNews);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            Log.e(mContext.getString(R.string.QueryUtils), mContext.getString(R.string.ProblemWithResults), e);
+        }
+        return NewsToday;
     }
 
-    /**
-     * Query the Guardian dataset and return a list of {@link News} objects.
-     */
-    public static List<News> fetchNewsData(String requestUrl) {
-
-        Log.i(LOG_TAG, "TEST: fetchNewsData() called...");
-
-        // Create URL object
+    public static ArrayList<News> fetchNewsdata(String requestUrl, Context context) {
+        mContext = context;
         URL url = createUrl(requestUrl);
 
         // Perform HTTP request to the URL and receive a JSON response back
@@ -74,10 +101,10 @@ public final class QueryUtils {
         }
 
         // Extract relevant fields from the JSON response and create a list of {@link News}s
-        List<News> news = extractFeatureFromJson(jsonResponse);
+        ArrayList<News> newsNow = QueryUtils.extractNews(jsonResponse);
 
         // Return the list of {@link News}s
-        return news;
+        return newsNow;
     }
 
     /**
@@ -153,102 +180,6 @@ public final class QueryUtils {
             }
         }
         return output.toString();
-    }
-
-    /**
-     * Return a list of {@link News} objects that has been built up from
-     * parsing the given JSON response.
-     */
-    private static List<News> extractFeatureFromJson(String newsJSON) {
-        // If the JSON string is empty or null, then return early.
-        if (TextUtils.isEmpty(newsJSON)) {
-            return null;
-        }
-
-        // Create an empty ArrayList that we can start adding news to
-        List<News> newsList = new ArrayList<>();
-
-        // Try to parse the JSON response string. If there's a problem with the way the JSON
-        // is formatted, a JSONException exception object will be thrown.
-        // Catch the exception so the app doesn't crash, and print the error message to the logs.
-        try {
-
-            // Create a JSONObject from the JSON response string
-            JSONObject baseJsonResponse = new JSONObject(newsJSON);
-
-            // Extract the JSONArray associated with the key called "results",
-            // which represents a list of results (or news).
-            JSONArray newsArray = baseJsonResponse.getJSONObject("response").getJSONArray("results");
-
-            // For each news in the newsArray, create an {@link News} object
-            for (int i = 0; i < newsArray.length(); i++) {
-
-                // Get a single news at position i within the list of news
-                JSONObject currentNews = newsArray.getJSONObject(i);
-
-                // Extract the value for the key called "webTitle"
-                String title = currentNews.getString("webTitle");
-
-                // Extract the value for the key called "sectionName"
-                String sectionName = currentNews.getString("sectionName");
-
-                // Extract the value for the key called "webPublicationDate"
-                String webPublicationDate = currentNews.getString("webPublicationDate");
-
-                //Format publication date
-                Date publicationDate = null;
-                try {
-                    publicationDate = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")).parse(webPublicationDate);
-                } catch (Exception e) {
-                    // If an error is thrown when executing the above statement in the "try" block,
-                    // catch the exception here, so the app doesn't crash. Print a log message
-                    // with the message from the exception.
-                    Log.e("QueryUtils", "Problem parsing the news date", e);
-                }
-
-                // Extract the value for the key called "url"
-                String url = currentNews.getString("webUrl");
-
-                //"Tags" element
-                JSONArray tags = currentNews.getJSONArray("tags");
-
-                //If "tags" array is not null
-                String authorFullName = "";
-                if (!tags.isNull(0)) {
-                    JSONObject currentTag = tags.getJSONObject(0);
-
-                    //Author first name
-                    String authorFirstName = !currentTag.isNull("firstName") ? currentTag.getString("firstName") : "";
-
-                    //Author last name
-                    String authorLastName = !currentTag.isNull("lastName") ? currentTag.getString("lastName") : "";
-
-                    //Author full name
-                    authorFullName = StringUtils.capitalize(authorFirstName.toLowerCase().trim()) + " " + StringUtils.capitalize(authorLastName.toLowerCase().trim());
-                    if (authorFirstName.trim() != "" || authorLastName.trim() != "") {
-                        authorFullName = ("By: ").concat(authorFullName);
-                    } else {
-                        authorFullName = "";
-                    }
-                }
-
-                // Create a new {@link News} object with the magnitude, location, time,
-                // and url from the JSON response.
-                News news = new News(sectionName, title, publicationDate, url, authorFullName);
-
-                // Add the new {@link News} to the list of news.
-                newsList.add(news);
-            }
-
-        } catch (JSONException e) {
-            // If an error is thrown when executing any of the above statements in the "try" block,
-            // catch the exception here, so the app doesn't crash. Print a log message
-            // with the message from the exception.
-            Log.e("QueryUtils", "Problem parsing the news JSON results", e);
-        }
-
-        // Return the list of news
-        return newsList;
     }
 
 }
