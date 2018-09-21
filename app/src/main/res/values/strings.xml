@@ -26,7 +26,7 @@
     <string name="settings_title">News Settings</string>
 
     <string name="settings_search_label">Search</string>
-    <string name="settings_Search_default" translatable="false"></string>
+    <string name="settings_Search_default" translatable="false">tech</string>
     <string name="settings_search_key" translatable="false">SearchTerm</string>
 
     <!-- Strings For Order-By Preference [CHAR LIMIT=30] -->

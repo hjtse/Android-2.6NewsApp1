@@ -117,6 +117,7 @@ public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<L
 
         // Append query parameter and its value. For example, the `format=geojson`
         uriBuilder.appendQueryParameter("format", "json");
+        uriBuilder.appendQueryParameter("q", Search);
         uriBuilder.appendQueryParameter("order-by", orderBy);
 
 
